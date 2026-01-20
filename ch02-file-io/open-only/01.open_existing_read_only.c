@@ -30,15 +30,30 @@
 #include <unistd.h>
 
 
+/*  Main entry point of the program.
 
+    argc : Argument count.
+    argv : Argument vector (array of strings).
+
+    Return value : 0 on success, non-zero on failure.
+*/
 int main(int argc, char* argv[])
 {
     // Use data.txt by default, or take the path from the first argument.
     const char* file_path = "data.txt";
 
-    if(argc == 2)
+    if(argc == 1)
+    {
+        file_path = "data.txt";
+    }
+    else if(argc == 2)
     {
         file_path = argv[1];
+    }
+    else
+    {
+        fprintf(stderr, "Usage: %s [file]\n", argv[0]);
+        return 1;
     }
 
     // Tell the user what we are about to do.
@@ -56,7 +71,7 @@ int main(int argc, char* argv[])
 
     // Show the file descriptor value returned by open().
     printf("The file is opened successfully.\n");
-    printf("This is the non negative integer value returned by open() on success : %d\n", fd);
+    printf("This is nonnegative integer value returned by open() on success : %d\n", fd);
 
     // Close the file to avoid leaking the descriptor.
     printf("Now call the close(fd) to avoid the FD leaks.\n");
@@ -66,9 +81,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-
     printf("[OK] close() succeeded and Lab 01 is completed.\n");
-
 
     return 0;
 }
