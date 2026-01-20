@@ -75,11 +75,16 @@ int main(int argc, char* argv[])
 
     // Close the file to avoid leaking the descriptor.
     printf("Now call the close(fd) to avoid the FD leaks.\n");
-    if(close(fd) < 0)
+
+    int fdc = close(fd);
+
+    if(fdc < 0)
     {
         perror("close");
         return 1;
     }
+
+    printf("The non-negative file descriptor %d is closed successfully.\n", fdc);
 
     printf("[OK] close() succeeded and Lab 01 is completed.\n");
 
