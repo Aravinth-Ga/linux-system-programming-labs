@@ -26,7 +26,6 @@
 */
 
 #include <fcntl.h>      // For open() and O_RDONLY
-#include <string.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -34,6 +33,7 @@
 
 int main(int argc, char* argv[])
 {
+    // Use data.txt by default, or take the path from the first argument.
     const char* file_path = "data.txt";
 
     if(argc == 2)
@@ -41,21 +41,25 @@ int main(int argc, char* argv[])
         file_path = argv[1];
     }
 
+    // Tell the user what we are about to do.
     printf("Lab 01: open an existing file in read only mode.\n");
     printf("Calling open(file_path, O_RDONLY [Read only mode])\n");
     
+    // Try to open the file in read-only mode.
     int fd = open(file_path, O_RDONLY);
 
     if(fd < 0)
     {
         perror("open");
-        printf("The file does not exist, Hence create a new one.\n");
         return 1;
     }
 
-    printf("The file is opened successfully");
-    printf("This is the non negative integer value returned by open() on successfull file open : %d\n", fd);
+    // Show the file descriptor value returned by open().
+    printf("The file is opened successfully.\n");
+    printf("This is the non negative integer value returned by open() on success : %d\n", fd);
 
+    // Close the file to avoid leaking the descriptor.
+    printf("Now call the close(fd) to avoid the FD leaks.\n");
     if(close(fd) < 0)
     {
         perror("close");
