@@ -43,6 +43,7 @@ int main(int argc, char* argv[])
     }
 
     printf("Lab03: Attempting to open a non-existent file with O_CREAT flag.\n");
+    printf("Target file path is: %s\n", file_name);
 
     int fd = open(file_name, O_RDONLY | O_CREAT, 0644);
 
@@ -53,8 +54,21 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    printf("Successfully opened (and created if not existing) file '%s' with FD: %d\n", file_name, fd);
+    printf("[OK] Successfully opened (and created if not existing) file '%s' with FD: %d\n", file_name, fd);
+
 
     // Close the file descriptor
-    close(fd);
+    printf("Closing the file descriptor to avoid the fd leaks %d\n", fd);
+
+    if(close(fd) < 0)
+    {
+        perror("close");
+        return 1;
+    }
+
+    printf("[OK] File descriptor %d closed successfully.\n", fd);
+    printf("Now, you can verify the file creation using 'ls -l %s' command.\n", file_name);
+
+    return 0;
+
 }
