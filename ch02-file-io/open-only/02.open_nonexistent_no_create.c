@@ -26,6 +26,13 @@
 #include <unistd.h>     // For close()
 
 
+/*  Main entry point of the program.
+
+    argc : Argument count.
+    argv : Argument vector (array of strings).
+
+    Return value : 0 on success, non-zero on failure.
+*/
 int main(int argc, char* argv[])
 {
     const char* file_path = "data_lab02.txt";
