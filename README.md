@@ -16,7 +16,10 @@ by isolating concepts and experimenting with kernel behavior.
 ## Current Progress
 
 - Chapter 2 – File I/O
-  - File opening (`open()` and `close()`) – in progress
+  - `open()` basics: read-only, missing file without `O_CREAT`
+  - `O_CREAT` flows: create, `O_EXCL`, `O_TRUNC`
+  - `O_APPEND` behavior
+  - Permission failure case (`EACCES`)
 
 ## Environment
 
@@ -26,5 +29,6 @@ by isolating concepts and experimenting with kernel behavior.
 
 ## Notes
 
-This repository intentionally avoids large frameworks or abstractions.
-Each lab is designed to be read, compiled, and understood in isolation.
+I keep the labs small on purpose so each file explains a single idea. The
+compiled outputs and quick screenshots live under `build/` and are only here
+to make it easier to sanity-check behavior while iterating.
