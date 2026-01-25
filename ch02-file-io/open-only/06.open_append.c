@@ -5,6 +5,7 @@
         open()
         write()
         close()
+        lseek()
     
     Flags used:
         O_APPEND    (Open file in append mode)
@@ -18,6 +19,10 @@
           append data to the end of the file, regardless of the current file
           offset.
         - umask effects the permission bits of the newly created file.
+        - lseek() manually changes the file offset.
+        - O_APPEND is a kernel offset mode, so even if you change the file offset
+          using lseek(), the write operation will still append data to the end
+          of the file.
 
 */
 
@@ -26,13 +31,19 @@
 #include <stdio.h>    // For printf() and perror()
 #include <unistd.h>   // For close()
 #include <sys/stat.h> // For mode constants
+#include <string.h>   // For strcmp()
 
+/* Main entry point of the program.
 
+    argc : Argument count.
+    argv : Argument vector (array of strings).
 
-
+    Return value : 0 on success, non-zero on failure.
+ */
 int main(int argc, char* argv[])
 {
     const char* file_name = "lab06_logfile_01.log";
+    int use_append_mode = 0;
 
     if(argc == 1)
     {
@@ -40,11 +51,42 @@ int main(int argc, char* argv[])
     }
     else if(argc == 2)
     {
-        file_name = argv[1];
+        if(strcmp(argv[1], "append") == 0)
+        {
+            // set the append mode as append
+            use_append_mode = 1;
+        }
+        else if(strcmp(argv[1], "lseek") == 0)
+        {
+            use_append_mode = 0;
+        }
+        else
+        {
+            fprintf(stderr, "Usage: %s [append | lseek][file]\n",argv[0]);
+            return 1;
+        }
+    }
+    else if(argc == 3)
+    {
+        if(strcmp(argv[1], "append") == 0)
+        {
+            use_append_mode = 1;
+        }
+        else if(strcmp(argv[1],"lseek") == 0)
+        {
+            use_append_mode = 0;
+        }
+        else
+        {
+            fprintf(stderr, "Usage : %s [append | lseek] [file]\n", argv[1]);
+            return 1;
+        }
+
+        file_name = argv[2];
     }
     else
     {
-        fprintf(stderr, "Usage : %s [file]\n", file_name);
+        fprintf(stderr, "Usage : %s [append | lseek][file]\n", file_name);
         return 1;
     }
 
@@ -52,9 +94,18 @@ int main(int argc, char* argv[])
     mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH ;
 
     // flags for open() call
-    int flag = O_WRONLY | O_CREAT | O_APPEND;
+    int flag = O_WRONLY | O_CREAT;
 
-    printf("Lab06 : open a file in append mode.\n");
+    if(use_append_mode == 0x01)
+    {
+        flag |= O_APPEND;
+        printf("Lab06 : open a file in append mode.\n");
+    }
+    else
+    {
+        printf("Lab06 : open a file in lseek mode.\n");
+    }
+
     printf("calling open(filepath, flags, mode)\n");
     // open the file in append mode
     int fd = open(file_name, flag, mode);
@@ -69,20 +120,45 @@ int main(int argc, char* argv[])
     printf("Write the log file some data");
 
     // write the file
-    const char msg[] = "The log file is generated and written successfully!";
-    static ssize_t bytes_written;
-    
-    do
-    {
-        bytes_written = write(fd, msg, sizeof(msg));
+    const char msg[] = "The log file is generated and written successfully!\n";
+    ssize_t bytes_written = 0;
+    ssize_t total = 0;
+    off_t current_offset;
 
+    // if not in append mode, move the file offset to the end of the file
+    if(use_append_mode == 0x00)
+    {
+        // move the file offset to the end of the file
+        current_offset = lseek(fd, 0, SEEK_END);
+
+        // check for lseek error
+        if(current_offset < 0)
+        {
+            perror("lseek");
+            return 1;
+        }
+    }
+
+    // write the complete message into the file
+    while(bytes_written < (ssize_t)(sizeof(msg)-1))
+    {
+        // write the message to the file
+        bytes_written = write(fd, msg + total, sizeof(msg) - total - 1);
+
+        // check for write error
         if(bytes_written < 0)
         {
             perror("write");
             return 1;
         }
+        
+        // update the total bytes written
+        total += bytes_written;
+    }
 
-    }while(bytes_written < (ssize_t)sizeof(msg));
+    // get the current file offset after write
+    current_offset = lseek(fd, 0, SEEK_CUR);
+    printf("Current offset after write: %ld\n", (long)current_offset);
 
     printf("Now all the bytes are written into the log file.\n");
     printf("Close the log file now.\n");
