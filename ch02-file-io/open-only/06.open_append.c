@@ -158,6 +158,14 @@ int main(int argc, char* argv[])
 
     // get the current file offset after write
     current_offset = lseek(fd, 0, SEEK_CUR);
+
+    // check for lseek error
+    if(current_offset < 0)
+    {
+        perror("lseek");
+        return 1;
+    }
+
     printf("Current offset after write: %ld\n", (long)current_offset);
 
     printf("Now all the bytes are written into the log file.\n");
