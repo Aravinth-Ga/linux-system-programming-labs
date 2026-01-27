@@ -82,6 +82,7 @@ int main(int argc, char* argv[])
         // Check for end of file
         if(n == 0)
         {
+            // EOF reached
             printf("EOF is reached.\n");
             break;
         }
@@ -96,6 +97,7 @@ int main(int argc, char* argv[])
     // Close the file
     if(close(fd) < 0)
     {
+        // Error in close
         perror("close");
         return 1;
     }
@@ -105,8 +107,8 @@ int main(int argc, char* argv[])
     for(__uint8_t loop_count = 0; loop_count < BUFFER_SIZE; loop_count++)
     {
         printf("%c ", buf[loop_count]);
-
     }
+
     printf("\n");
 
     return 0;
