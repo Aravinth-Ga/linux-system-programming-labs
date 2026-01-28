@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     else
     {
         // Invalid arguments
-        fprintf(stderr, "Usage :%s [file]", file_name);
+        fprintf(stderr, "Usage :%s [file]", argv[0]);
         return 1;
     }
 
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
     printf("The file open is success.\n");
     printf("Read a file now.\n");
 
-    unsigned char buf[16];
+    unsigned char buf[BUFFER_SIZE];
     while(1)
     {
         // Read data from the file
@@ -78,6 +78,7 @@ int main(int argc, char* argv[])
         {
             // Error in read
             perror("read");
+            close(fd);
             return 1;
         }
 
@@ -89,14 +90,21 @@ int main(int argc, char* argv[])
             break;
         }
 
-        write(STDOUT_FILENO, buf, n); // Write to standard output
+        // Write the read data to standard output
+        ssize_t written_bytes = write(STDOUT_FILENO, buf, n); // Write to standard output
 
+        // Check for write error
+        if(written_bytes == -1)
+        {
+            perror("write");
+            close(fd);
+            return 1;
+        }
 
     }
 
     printf("Read operation is success.\n");
     printf("Now close the file.\n");
-
 
     // Close the file
     if(close(fd) < 0)
