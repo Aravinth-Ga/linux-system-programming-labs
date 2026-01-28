@@ -20,6 +20,7 @@
 #include <fcntl.h>      // open(), O_RDONLY
 #include <stdio.h>      // printf(), perror()
 #include <unistd.h>     // close()
+#include <stdint.h>     // __uint8_t
 
 
 #define BUFFER_SIZE 16
@@ -72,7 +73,8 @@ int main(int argc, char* argv[])
         // Read data from the file
         ssize_t n = read(fd, buf, sizeof(buf));
 
-        if(n < 0)
+        // EINTR is not handled in this example for simplicity
+        if(n == -1)
         {
             // Error in read
             perror("read");
@@ -83,16 +85,18 @@ int main(int argc, char* argv[])
         if(n == 0)
         {
             // EOF reached
-            printf("EOF is reached.\n");
+            printf("\nEOF is reached.\n");
             break;
         }
 
-        printf("Read is returned %zd bytes.\n",n);
+        write(STDOUT_FILENO, buf, n); // Write to standard output
+
 
     }
 
     printf("Read operation is success.\n");
     printf("Now close the file.\n");
+
 
     // Close the file
     if(close(fd) < 0)
@@ -102,13 +106,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    // Print the read data
-    printf("Print the read data : \n");
-    for(__uint8_t loop_count = 0; loop_count < BUFFER_SIZE; loop_count++)
-    {
-        printf("%c ", buf[loop_count]);
-    }
-
+    printf("File is closed successfully.\n");
     printf("\n");
 
     return 0;
