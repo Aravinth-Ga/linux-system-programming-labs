@@ -4,7 +4,8 @@ This repository contains hands-on lab exercises created while studying
 **Linux System Programming** by Robert Love.
 
 The goal is to build deep, long-lasting understanding of Linux system calls
-by isolating concepts and experimenting with kernel behavior.
+by isolating concepts, experimenting with kernel behavior, and learning the
+real reasons things succeed or fail.
 
 ## Philosophy
 
@@ -20,6 +21,10 @@ by isolating concepts and experimenting with kernel behavior.
   - `O_CREAT` flows: create, `O_EXCL`, `O_TRUNC`
   - `O_APPEND` behavior
   - Permission failure case (`EACCES`)
+  - `read()` basics: buffer usage and return values
+  - `read()` loop behavior on normal and empty files
+  - File offset + `fstat` checks around reads
+  - Permission failure case (`EACCES`) for `read()`
 
 ## Environment
 
@@ -29,6 +34,7 @@ by isolating concepts and experimenting with kernel behavior.
 
 ## Notes
 
-I keep the labs small on purpose so each file explains a single idea. The
-compiled outputs and quick screenshots live under `build/` and are only here
-to make it easier to sanity-check behavior while iterating.
+I keep the labs small on purpose so each file explains a single idea and I can
+see the behavior clearly. The compiled outputs and quick screenshots live under
+`build/` and are only here to make it easier to sanity-check behavior while
+iterating.
