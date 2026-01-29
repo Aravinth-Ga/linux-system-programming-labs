@@ -76,8 +76,9 @@ int main()
         }
         
         // write to standard output
+        ssize_t n_read = bytes_read;
         while(1){
-            ssize_t written_bytes = write(STDOUT_FILENO, buf_read, bytes_read);
+            ssize_t written_bytes = write(STDOUT_FILENO, buf_read, n_read);
             if(written_bytes < 0)
             {
                 if(errno == EINTR){
@@ -91,11 +92,11 @@ int main()
                     return 1;
                 }
             }
-            if(written_bytes < bytes_read)
+            if(written_bytes < n_read)
             {
                 // Partial write, adjust buffer and continue writing
-                memmove(buf_read, buf_read + written_bytes, bytes_read - written_bytes);
-                bytes_read -= written_bytes;
+                memmove(buf_read, buf_read + written_bytes, n_read - written_bytes);
+                n_read -= written_bytes;
             } 
             else 
             {
