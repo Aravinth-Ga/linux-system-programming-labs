@@ -79,8 +79,17 @@ int main(int argc, char* argv[])
 
         if(bytes_read < 0)
         {
-            fprintf(stderr, " read() failed : %s (errono=%d).\n", stderr(errno), errno);
-            return 1;
+            if(errno == EINTR)
+            {
+                // Interrupted by the signal or system call entry : retry
+                continue;
+            }
+            else
+            {
+                // Non blocking read is not handled here.
+                fprintf(stderr, " read() failed : %s (errono=%d).\n", stderr(errno), errno);
+                return 1;
+            }
         }
 
         total_bytes += (uint64_t)bytes_read;
@@ -117,6 +126,14 @@ int main(int argc, char* argv[])
         memcpy(carry_buff+carry_buff_len, io_buff, sizeof(io_buff));
         // update the carry buffer length
         carry_buff_len += (size_t) bytes_read;
+
+
+
+        if(bytes_read == 0)
+        {
+            printf("EOF is reached.\n");
+            break;
+        }
 
         
     }
