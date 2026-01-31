@@ -1,6 +1,6 @@
-# Special Files
+# FD Kinds
 
-Pipes, sockets, and device files still use read/write, but they do not behave
+Devices, pipes/FIFOs, and sockets still use read/write, but they do not behave
 like regular files. Keeping them separate makes it easier to compare.
 
 Next

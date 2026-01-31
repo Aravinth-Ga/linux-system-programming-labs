@@ -7,12 +7,26 @@ add topics that are outside the book.
 ## Layout
 
 - `01-regular-files/` (open/read/write/lseek/stat/permissions)
-- `02-special-files/` (char devices, pipes, sockets)
+- `02-fd-kinds/` (devices, pipes/FIFOs, sockets)
 - `03-process/` (fork/exec/wait/signals)
 - `04-memory/` (mmap, shared memory)
 - `99-scratch/` (quick tests)
 
 Each folder has a small README with status and a simple/advanced split.
+
+## Concept index
+
+Concept | Regular file | FIFO/pipe | Socket
+--- | --- | --- | ---
+EOF semantics | yes | yes | tcp-only
+lseek() offsets | yes | no | no
+Blocking read | yes | yes | yes
+Partial read/write | yes | yes | yes
+Message boundaries | n/a | no | tcp: no, udp: yes
+
+## Lab naming
+
+Use `labNN_<topic>.c` inside each lab folder, with `NN` local to that folder.
 
 ## Current status
 
