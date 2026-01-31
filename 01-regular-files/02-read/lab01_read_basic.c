@@ -1,5 +1,5 @@
 /*
-    lab08 : read a file basic demo.
+    lab01 : read a file basic demo.
 
     Systen call used :
         open()
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    printf("Lab08 : read basic.\n");
+    printf("Lab01 : read basic.\n");
     printf("Opening file in Read only mode.\n");
 
     //  Open the file in read-only mode

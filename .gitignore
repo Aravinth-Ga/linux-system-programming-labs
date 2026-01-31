@@ -1,4 +1,15 @@
+# Build artifacts
+build/
+**/build/
+
+# Binaries and objects
+*.o
+*.out
+*.exe
+
+# Editor files
+*.swp
+*.swo
+*.DS_Store
+
 notes.txt
-.vscode/c_cpp_properties.json
-.vscode/launch.json
-.vscode/settings.json

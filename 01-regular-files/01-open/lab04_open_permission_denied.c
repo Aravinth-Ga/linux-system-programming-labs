@@ -1,5 +1,5 @@
 /*
-    lab 07: open a file with permission denied error handling
+    lab 04: open a file with permission denied error handling
 
     syscalls used:
         open()
@@ -37,7 +37,7 @@ static void file_open(const char* file, int flag, const char* label);
 
 int main(int argc, char* argv[])
 {
-    const char* file = "lab07_secret.txt";
+    const char* file = "lab04_secret.txt";
 
     // Handle command line arguments
     if(argc == 1)
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    printf("Lab07 : open() permission denied demo.\n");
+    printf("Lab04 : open() permission denied demo.\n");
     printf("Expected setup : chmod 000 filename (therfore the open/read/write fails).\n");
 
     // Try to open the file with different access modes

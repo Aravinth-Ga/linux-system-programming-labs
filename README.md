@@ -1,40 +1,35 @@
 # Linux System Programming Labs
 
-This repository contains hands-on lab exercises created while studying
-**Linux System Programming** by Robert Love.
+Notes and small labs from my system programming practice in C. The book
+"Linux System Programming" by Robert Love is the starting point, but I also
+add topics that are outside the book.
 
-The goal is to build deep, long-lasting understanding of Linux system calls
-by isolating concepts, experimenting with kernel behavior, and learning the
-real reasons things succeed or fail.
+## Layout
 
-## Philosophy
+- `01-regular-files/` (open/read/write/lseek/stat/permissions)
+- `02-special-files/` (char devices, pipes, sockets)
+- `03-process/` (fork/exec/wait/signals)
+- `04-memory/` (mmap, shared memory)
+- `99-scratch/` (quick tests)
 
-- One concept per lab
-- Minimal code, maximum clarity
-- Focus on *why* something works or fails
-- Learn by observing kernel behavior, not memorizing APIs
+Each folder has a small README with status and a simple/advanced split.
 
-## Current Progress
+## Current status
 
-- Chapter 2 – File I/O
-  - `open()` basics: read-only, missing file without `O_CREAT`
-  - `O_CREAT` flows: create, `O_EXCL`, `O_TRUNC`
-  - `O_APPEND` behavior
-  - Permission failure case (`EACCES`)
-  - `read()` basics: buffer usage and return values
-  - `read()` loop behavior on normal and empty files
-  - File offset + `fstat` checks around reads
-  - Permission failure case (`EACCES`) for `read()`
+- `open()` basics (existing file, create, create + exclusive, trunc, append)
+- Permission errors (`EACCES`)
+- `read()` basics (buffer use, return values, loops, empty files)
+- File offset checks with `fstat()`
 
-## Environment
+## Next
 
-- Language: C
-- Platform: Linux (tested on modern distributions)
-- Focus: User-space system programming, POSIX interfaces
+- Add write() labs
+- Add `lseek()` and `stat()` labs
+- Add char device labs with `/dev/null` and `/dev/zero`
+- Add pipes and FIFOs
+- Add Unix sockets (AF_UNIX), then TCP/UDP
+- Add process and memory topics when I reach them
 
 ## Notes
 
-I keep the labs small on purpose so each file explains a single idea and I can
-see the behavior clearly. The compiled outputs and quick screenshots live under
-`build/` and are only here to make it easier to sanity-check behavior while
-iterating.
+Build output and quick test files go into `build/` folders and are ignored.

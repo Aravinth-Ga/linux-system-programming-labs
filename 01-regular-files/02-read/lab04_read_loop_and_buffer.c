@@ -1,5 +1,5 @@
 /*
-    lab10 : This program demonstrates reading from a file using a loop and a buffer.
+    lab04 : This program demonstrates reading from a file using a loop and a buffer.
 
     System Calls covered :
         open()
@@ -140,5 +140,4 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-
 

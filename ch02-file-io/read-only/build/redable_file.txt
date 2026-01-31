@@ -1,2 +1,0 @@
-Hi! Welcome to this lab09 excerceise. This is normal file read excerceise.
-here the written value of the read() system call is validated.

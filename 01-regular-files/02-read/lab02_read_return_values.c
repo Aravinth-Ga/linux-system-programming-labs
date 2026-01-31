@@ -1,5 +1,5 @@
 /*
-    Lab 09: Handling return values of read()
+    Lab 02: Handling return values of read()
 
     System Calls used:
         open()
@@ -40,7 +40,7 @@ int main()
     /* 1. Read the normal file  */
 
     // open the file
-    printf("Lab09. Read() return values.\n");
+    printf("Lab02. Read() return values.\n");
     printf("1. Read the normal file.\n");
 
     int fd = open(redable_file_path, O_RDONLY);

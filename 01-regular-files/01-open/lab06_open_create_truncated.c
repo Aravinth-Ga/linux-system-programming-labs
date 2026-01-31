@@ -1,5 +1,5 @@
 /*
-    lab05 : Create and open a file. If the file already exists, truncate its length to zero.
+    lab06 : Create and open a file. If the file already exists, truncate its length to zero.
 
     System calls used:
         - open()
@@ -40,7 +40,7 @@ static void print_mode_bits(mode_t mode);
 */
 int main(int argc, char* argv[])
 {
-    const char* file_path = "data_lab05.txt";
+    const char* file_path = "data_lab06.txt";
 
     if(argc == 1)
     {
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
         return 2;
     }
 
-    printf("Lab05: Attempting to create/open a file withh O_CREAT | O_TRUNC flags.\n");
+    printf("Lab06: Attempting to create/open a file withh O_CREAT | O_TRUNC flags.\n");
     printf("target file path is: %s\n", file_path);
 
     // Set flags for open() call
@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
     }
 
     // Write a sample message to the file
-    const char* message = "Hello world! This is lab05.\n";
+    const char* message = "Hello world! This is lab06.\n";
 
     ssize_t bytes_written = write(fd, message, sizeof(message) - 1); // sizeof(message) - 1 is the length of the message
 

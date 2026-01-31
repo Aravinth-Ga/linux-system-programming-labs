@@ -16,7 +16,7 @@
     How to compile:
         1. Ensure you are in the directory containing this source file.
         2. Use the following command to compile:
-             gcc -Wall -Wextra -O2 -g 02_open_nonexistent_no_create.c -o lab02
+            gcc -Wall -Wextra -O2 -g lab02_open_nonexistent_no_create.c -o lab02
         3. Run the compiled program with a non-existent file:
              ./lab02 nonexistent.txt
 */

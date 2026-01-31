@@ -1,5 +1,5 @@
 /*
-    lab 06: Open a file in append mode
+    lab 07: Open a file in append mode
 
     System calls used:
         open()
@@ -42,7 +42,7 @@
  */
 int main(int argc, char* argv[])
 {
-    const char* file_name = "lab06_logfile_01.log";
+    const char* file_name = "lab07_logfile_01.log";
     int use_append_mode = 0;
 
     if(argc == 1)
@@ -99,11 +99,11 @@ int main(int argc, char* argv[])
     if(use_append_mode == 0x01)
     {
         flag |= O_APPEND;
-        printf("Lab06 : open a file in append mode.\n");
+        printf("Lab07 : open a file in append mode.\n");
     }
     else
     {
-        printf("Lab06 : open a file in lseek mode.\n");
+        printf("Lab07 : open a file in lseek mode.\n");
     }
 
     printf("calling open(filepath, flags, mode)\n");
@@ -178,7 +178,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    printf("[Ok] The lab06 is completed. The file is opended, updated and closed successfully");
+    printf("[Ok] The lab07 is completed. The file is opended, updated and closed successfully");
 
     return 0;
 

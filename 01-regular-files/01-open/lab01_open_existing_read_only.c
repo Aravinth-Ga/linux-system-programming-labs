@@ -20,7 +20,7 @@
            file named data.txt using:
              touch data.txt
         2. Use the following command to compile:
-             gcc -Wall -Wextra -O2 -g 01_open_existing_read_only.c -o lab01
+            gcc -Wall -Wextra -O2 -g lab01_open_existing_read_only.c -o lab01
         3. Run the compiled program:
              ./lab01 data.txt
 */

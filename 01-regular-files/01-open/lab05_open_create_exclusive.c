@@ -1,5 +1,5 @@
 /*
-    Lab 04 : Create a file using open() with O_CREAT | O_EXCL flags
+    Lab 05 : Create a file using open() with O_CREAT | O_EXCL flags
 
     System calls used:
         - open()
@@ -35,7 +35,7 @@
 */
 int main(int argc, char* argv[])
 {
-    const char* file_name = "data_lab04.txt";
+    const char* file_name = "data_lab05.txt";
 
     if(argc == 1)
     {
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    printf("Lab04: Attempting to create a new file with O_CREAT | O_EXCL flags (atomic create).\n");
+    printf("Lab05: Attempting to create a new file with O_CREAT | O_EXCL flags (atomic create).\n");
     printf("Target file path is: %s\n", file_name);
 
     // Set flags for open() call 
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
     
     printf("Now writing some data to the newly created file...\n");
 
-    const char data[] = "Hello from lab04. \n";
+    const char data[] = "Hello from lab05. \n";
 
     // some times here the data could be written partially.This will be handled in later labs.
     if(write(fd, data, sizeof(data)-1) < 0)
