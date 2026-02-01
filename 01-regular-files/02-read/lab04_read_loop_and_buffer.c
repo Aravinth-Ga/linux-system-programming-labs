@@ -31,7 +31,16 @@
 
 
 
+static bool line_is_interesting(const char* line, size_t n)
+{
+    const char* p = line;
+    const char* end = line + n;
 
+    while (p < end)
+    {
+
+    }
+}
 
 int main(int argc, char* argv[])
 {
@@ -91,52 +100,90 @@ int main(int argc, char* argv[])
                 return 1;
             }
         }
-
-        total_bytes += (uint64_t)bytes_read;
-
-        // calculate the needed buffer size
-        ssize_t buff_needed = bytes_read + carry_buff_len;
-
-        if(buff_needed > carry_buff_capacity)
-        {
-            size_t new_capacity = (carry_buff_capacity == 0) ? 8192 : carry_buff_capacity;
-
-            while(new_capacity < buff_needed)
-            {
-                new_capacity *= 2;
-            }
-
-            // reallocate the buffer based on the new capacity
-            char* tmp = (char*)realloc(carry_buff, new_capacity);
-
-            // check if the memory allocation fails
-            if(tmp == NULL)
-            {
-                fprintf(stderr, "realloc() failed while growing the carry buffer.\n");
-                free(carry_buff);
-                close(fd);
-                return 1;
-            }
-
-            carry_buff = tmp;
-            carry_buff_capacity = new_capacity;
-        }
-
-        // copy the data from the io buff to carry buff
-        memcpy(carry_buff+carry_buff_len, io_buff, sizeof(io_buff));
-        // update the carry buffer length
-        carry_buff_len += (size_t) bytes_read;
-
-
-
-        if(bytes_read == 0)
+        else if(bytes_read == 0)
         {
             printf("EOF is reached.\n");
             break;
         }
+        else
+        {
 
-        
+            total_bytes += (uint64_t)bytes_read;
+
+            // calculate the needed buffer size
+            ssize_t buff_needed = bytes_read + carry_buff_len;
+
+            if(buff_needed > carry_buff_capacity)
+            {
+                size_t new_capacity = (carry_buff_capacity == 0) ? 8192 : carry_buff_capacity;
+
+                while(new_capacity < buff_needed)
+                {
+                    new_capacity *= 2;
+                }
+
+                // reallocate the buffer based on the new capacity
+                char* tmp = (char*)realloc(carry_buff, new_capacity);
+
+                // check if the memory allocation fails
+                if(tmp == NULL)
+                {
+                    fprintf(stderr, "realloc() failed while growing the carry buffer.\n");
+                    free(carry_buff);
+                    close(fd);
+                    return 1;
+                }
+
+                carry_buff = tmp;
+                carry_buff_capacity = new_capacity;
+            }
+
+            // copy the data from the io buff to carry buff
+            memcpy(carry_buff+carry_buff_len, io_buff, sizeof(io_buff));
+            // update the carry buffer length
+            carry_buff_len += (size_t) bytes_read;
+
+            size_t start_index = 0;
+
+            // Check for the chunk of data read, split the lines based on the \n 
+            for(size_t index ; index < carry_buff_len; index++)
+            {
+                // check for the new lines
+                if(carry_buff[index] == '\n')
+                {
+                    // Calculate the line length
+                    size_t line_length = index - start_index + 1;
+                    const char* line = start_index + carry_buff;
+
+                    //TODO:  copy the data bytes to any files or stream it
+
+                    // Add +1 for \n.
+                    start_index += index + 1;
+
+                }
+            }
+
+            // move the left over/uncompleted lines to the carry buffer start
+            if(start_index > 0)
+            {
+                memmove(carry_buff, carry_buff + start_index, (carry_buff_len - start_index));
+                carry_buff_len = carry_buff_len - start_index;
+            }
+
+            continue;
+        }
     }
+
+    //TODO: if there is a leftover bytes without \n consider as last line.
+
+    if(close(fd) < 0)
+    {
+        perror("close");
+    }  
+
+    // TODO: Output all the lines to the stdout
+    
+    free(carry_buff);
 
     return 0;
 }
