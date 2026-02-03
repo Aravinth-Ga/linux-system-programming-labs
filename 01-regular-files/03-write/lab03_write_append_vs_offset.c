@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        fprintf(stderr, "Usage : %s [append | lseek] [file].'\n", argv[0]);
+        fprintf(stderr, "Usage : %s [append | lseek] [file].\n", argv[0]);
         return 1;
     }
 
@@ -115,8 +115,10 @@ int main(int argc, char* argv[])
 
     if(enable_append_mode == 0)
     {
-        // move the current offset to the EOF if the lseek() is enabled
-        fd_offset = lseek(file_descriptor, 0, SEEK_END);
+        // update the fd current offset. 
+        // In reality this position will be updated by some other files operations. 
+        const off_t desired_offset = 5;
+        fd_offset = lseek(file_descriptor, desired_offset, SEEK_SET);
 
         if(fd_offset < 0)
         {
