@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
         }
         else
         {
-            fprintf(stderr, "Usage : %s [append | lseek] [file]\n", argv[1]);
+            fprintf(stderr, "Usage : %s [append | lseek] [file]\n", argv[0]);
             return 1;
         }
 
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        fprintf(stderr, "Usage : %s [append | lseek][file]\n", file_name);
+        fprintf(stderr, "Usage : %s [append | lseek] [file]\n", argv[0]);
         return 1;
     }
 
@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
     }
 
     printf("The log file is creation is success.\n");
-    printf("Write the log file some data");
+    printf("Write the log file some data.\n");
 
     // write the file
     const char msg[] = "The log file is generated and written successfully!\n";
@@ -135,6 +135,7 @@ int main(int argc, char* argv[])
         if(current_offset < 0)
         {
             perror("lseek");
+            close(fd);
             return 1;
         }
     }
@@ -149,6 +150,7 @@ int main(int argc, char* argv[])
         if(bytes_written < 0)
         {
             perror("write");
+            close(fd);
             return 1;
         }
         
@@ -163,6 +165,7 @@ int main(int argc, char* argv[])
     if(current_offset < 0)
     {
         perror("lseek");
+        close(fd);
         return 1;
     }
 
@@ -178,7 +181,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    printf("[Ok] The lab07 is completed. The file is opended, updated and closed successfully");
+    printf("[Ok] The lab07 is completed. The file is opened, updated and closed successfully.\n");
 
     return 0;
 
