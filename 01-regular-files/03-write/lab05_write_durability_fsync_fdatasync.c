@@ -11,7 +11,6 @@
     flags used:
         O_WRONLY
         O_CREAT
-        O_APPEND
         O_TRUNC
     
     error handling:
@@ -53,6 +52,38 @@ static void helper_func(const char* argv)
                     "  %s  --none sample.txt\n", argv, argv, argv, argv);
 }
 
+static int write_func(int fd, const void* buff, size_t len)
+{
+    const char* data = (const char*) buff;
+    size_t total_bytes = 0;
+    int retry_count = 0;
+
+    while(total_bytes < len)
+    {
+        ssize_t bytes_written = write(fd, data + total_bytes, len - total_bytes);
+
+        if(bytes_written < 0)
+        {
+            if(errno == EINTR)
+                continue;
+            else
+                return -1;
+
+        }
+        else if(bytes_written == 0)
+        {
+            errno = EIO;
+            return -1;
+        }
+        else
+        {
+            total_bytes += bytes_written;
+        }
+    }
+
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {
     const char* file_path = "lab05_write_fsync_fdatasync.txt";
@@ -78,7 +109,7 @@ int main(int argc, char* argv[])
         else if((strcmp(argv[i], "--help") == 0) || (strcmp(argv[i], "--h") == 0))
         {
             helper_func(argv[0]);
-            return 1;
+            return 0;
         }
         else
         {
@@ -95,7 +126,7 @@ int main(int argc, char* argv[])
     mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 
     // Open the file
-    int fd = open(fd, flag, mode);
+    int fd = open(file_path, flag, mode);
 
     if(fd < 0)
     {
@@ -107,23 +138,68 @@ int main(int argc, char* argv[])
 
     char message[256];
     int pid = getpid();
-    int n = snprintf(message, sizeof(message), 
-                    "Lab05: Write with durability : pid = %d\n",
+    int no_of_bytes = snprintf(message, sizeof(message), 
+                    "Lab05: Write with durability : pid = %d\n"
                     "This line should survive a crash only if synced.\n",
                     pid);
 
     // check for an error
-    if(n < 0)
+    if(no_of_bytes < 0)
     {
-        perror("snprintf is failed.\n");
+        perror("snprintf");
+        close(fd);
+        return 1;
     }
-    else if(n >= sizeof(message))
+    else if((size_t)no_of_bytes >= sizeof(message))
     {
-        printf("snprintf output was truncated because the formatted message did not fit in the buffer.\n");
+        fprintf(stderr,"snprintf output was truncated because the formatted message did not fit in the buffer.\n");
+        close(fd);
+        return 1;
     }
 
     // 5. Write the data
+    
+    if(write_func(fd, message, (size_t)no_of_bytes) < 0)
+    {
+        perror("write");
+        close(fd);
+        return 1;
+    }
 
+    // 6. Flush the data into the disk
+
+    if(durability_mode == MODE_FSYNC)
+    {
+        if(fsync(fd) < 0)
+        {
+            perror("fsync");
+            close(fd);
+            return 1;
+        }
+
+        printf("Durability mode is fsync(). data + metadata is flushed.\n");
+    }
+    else if(durability_mode == MODE_FDATASYNC)
+    {
+        if(fdatasync(fd) < 0)
+        {
+            perror("fdatasync");
+            close(fd);
+            return 1;
+        }
+        printf("Durability mode is fdatasync(). Data + minimal data to retrive the file is flushed.\n");
+    }
+    else
+    {
+        printf("Durability mode is none. write() only. data may still in the page cache.\n");
+    }
+
+    // 7. Close the file
+    if(close(fd) < 0)
+    {
+        perror("close");
+        return 1;
+    }
 
     return 0;
 }
