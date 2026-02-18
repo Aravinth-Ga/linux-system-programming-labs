@@ -23,7 +23,10 @@
     Hardware tested on:
         - Jetson Orin Nano
 
-    Note : Partial Read/Write is not handled in this basic lab.
+    Note : 
+        1. Partial Read/Write is not handled in this basic lab.
+        2. Child read and Parent write is a design choice and it can be any.
+
 */
 
 #include <fcntl.h>
@@ -47,7 +50,7 @@ int main()
     
     }
 
-    // Create a child process
+    // fork() creates one child; both processes continue from this line.
     pid_t child_pid = fork();
 
     if(child_pid < 0)
@@ -57,9 +60,9 @@ int main()
     }
     else if(child_pid == 0)
     {
-        /* Child process */
+        /* Child path: fork() returned 0 in the child. */
 
-        // child does not write, hence close the write end
+        // Child only reads from pipefd[0], so close unused write end.
 
         if(close(pipefd[1]))
         {
@@ -83,15 +86,15 @@ int main()
             exit(EXIT_FAILURE);
         }
 
-        // reading is completed.
+        // Child finished reading and can exit.
         exit(EXIT_SUCCESS);
 
     }
     else
     {
-        /* Parent process */
+        /* Parent path: fork() returned child PID (> 0). */
 
-        // parent does not read, hence close the read end
+        // Parent only writes to pipefd[1], so close unused read end.
 
         if(close(pipefd[0]) < 0)
         {
@@ -103,9 +106,20 @@ int main()
 
         ssize_t bytes_written  = write(pipefd[1], plain_text, strlen(plain_text));
 
-        close(pipefd[1]);
+        if(bytes_written < 0)
+        {
+            perror("write");
+            exit(EXIT_FAILURE);
+        }
 
-        wait(NULL); // wait for the child to finish the read.
+        if(close(pipefd[1]) < 0)
+        {
+            perror("close");
+            exit(EXIT_FAILURE);
+        }
+
+        // Wait for child to complete before parent exits.
+        wait(NULL);
 
     }
 
