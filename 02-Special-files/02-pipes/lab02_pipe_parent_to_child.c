@@ -27,7 +27,7 @@
         1. Partial Read/Write is not handled in this basic lab.
         2. Child read and Parent write is a design choice and it can be any.
 
-*/
+ */
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -38,14 +38,22 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 
+/* Print error and exit. */
+static void die_pipe(const char* msg)
+{
+    perror(msg);
+    exit(EXIT_FAILURE);
+}
 
+
+/* Create pipe, fork, then send data from parent to child. */
 int main()
 {
     int pipefd[2];
 
     if(pipe(pipefd) == -1)
     {
-        perror("pipe");
+        die_pipe("pipe");
         return 1;
     
     }
@@ -55,8 +63,7 @@ int main()
 
     if(child_pid < 0)
     {
-        perror("fork");
-        exit(EXIT_FAILURE);
+        die_pipe("fork");
     }
     else if(child_pid == 0)
     {
@@ -66,8 +73,7 @@ int main()
 
         if(close(pipefd[1]))
         {
-            perror("close");
-            exit(EXIT_FAILURE);
+            die_pipe("close");
         }
 
         char read_buff[1024];
@@ -82,8 +88,7 @@ int main()
 
         if(close(pipefd[0]) < 0)
         {
-            perror("close");
-            exit(EXIT_FAILURE);
+            die_pipe("close");
         }
 
         // Child finished reading and can exit.
@@ -98,8 +103,7 @@ int main()
 
         if(close(pipefd[0]) < 0)
         {
-            perror("close");
-            exit(EXIT_FAILURE);
+            die_pipe("close");
         }
 
         const char* plain_text = "Hi! This is the message from parent process.\n";
@@ -108,20 +112,17 @@ int main()
 
         if(bytes_written < 0)
         {
-            perror("write");
-            exit(EXIT_FAILURE);
+            die_pipe("write");
         }
 
         if(close(pipefd[1]) < 0)
         {
-            perror("close");
-            exit(EXIT_FAILURE);
+            die_pipe("close");
         }
 
         // Wait for child to complete before parent exits.
         wait(NULL);
 
     }
-
 
 }
