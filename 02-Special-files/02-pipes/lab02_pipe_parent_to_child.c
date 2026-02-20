@@ -38,7 +38,12 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 
-/* Print error and exit. */
+/*
+ * die_pipe - Print an error message and terminate the process
+ * @msg: Short context string passed to perror()
+ *
+ * Used for unrecoverable syscall failures in this lab.
+ */
 static void die_pipe(const char* msg)
 {
     perror(msg);
@@ -46,7 +51,15 @@ static void die_pipe(const char* msg)
 }
 
 
-/* Create pipe, fork, then send data from parent to child. */
+/*
+ * main - Demonstrate one-way pipe communication (parent -> child)
+ *
+ * Flow:
+ * 1) Create a pipe
+ * 2) Fork into parent and child
+ * 3) Parent writes a message, child reads it
+ * 4) Close unused ends in each process and wait for child
+ */
 int main()
 {
     int pipefd[2];
@@ -58,7 +71,7 @@ int main()
     
     }
 
-    // fork() creates one child; both processes continue from this line.
+    // Create a child process; both parent and child continue from here.
     pid_t child_pid = fork();
 
     if(child_pid < 0)
@@ -69,7 +82,7 @@ int main()
     {
         /* Child path: fork() returned 0 in the child. */
 
-        // Child only reads from pipefd[0], so close unused write end.
+        // Child is the reader: close the write end it does not use.
 
         if(close(pipefd[1]))
         {
@@ -91,7 +104,7 @@ int main()
             die_pipe("close");
         }
 
-        // Child finished reading and can exit.
+        // Child work is done after reading once.
         exit(EXIT_SUCCESS);
 
     }
@@ -99,7 +112,7 @@ int main()
     {
         /* Parent path: fork() returned child PID (> 0). */
 
-        // Parent only writes to pipefd[1], so close unused read end.
+        // Parent is the writer: close the read end it does not use.
 
         if(close(pipefd[0]) < 0)
         {
@@ -120,7 +133,7 @@ int main()
             die_pipe("close");
         }
 
-        // Wait for child to complete before parent exits.
+        // Wait so parent does not exit before child finishes.
         wait(NULL);
 
     }

@@ -40,40 +40,42 @@
 
 
 /*
- * die_pipe - Print error message and exit the program
- * @msg: Error message to print using perror()
- * 
- * This utility function prints the provided error message along with
- * the system error description and then terminates the program with EXIT_FAILURE.
+ * die_pipe - Print an error message and terminate the process
+ * @msg: Context string passed to perror()
+ *
+ * Used for unrecoverable syscall failures in this lab.
  */
  static void die_pipe(const char* msg)
  {
-    perror(msg);  // Print error message
-    exit(EXIT_FAILURE);  // Exit with failure status
+    perror(msg);
+    exit(EXIT_FAILURE);
  }
 
 /*
- * main - Demonstrates pipe communication where child writes to parent
- * 
- * Creates a pipe and forks a child process. The child writes a message to the pipe
- * while the parent reads from it. Shows proper file descriptor management and IPC.
- * 
+ * main - Demonstrate one-way pipe communication (child -> parent)
+ *
+ * Flow:
+ * 1) Create a pipe
+ * 2) Fork into parent and child
+ * 3) Child writes a message, parent reads it
+ * 4) Close unused ends in each process and wait for child
+ *
  * Return: 0 on success
  */
  int main()
  {
-    int pipe_fd[2];  // File descriptors: [0] = read end, [1] = write end
+    int pipe_fd[2];  // [0] read end, [1] write end
 
-    // Create a unidirectional pipe for parent-child communication
+    // Create a unidirectional pipe.
     if(pipe(pipe_fd) < 0)
     {
         die_pipe("pipe");
     }
 
-    // Fork a new process for child-parent communication
+    // Create child process; both parent and child continue from here.
     pid_t process_id = fork();
 
-    // Check for fork error
+    // Handle fork failure.
     if(process_id < 0)
     {
         die_pipe("fork");
@@ -81,34 +83,32 @@
 
     if(process_id == 0)
     {
-        // ============== CHILD PROCESS ==============
-        // Child writes a message through the pipe to the parent process
-        // First, close the read end since child only writes
+        // Child is the writer: close unused read end.
         if(close(pipe_fd[0]) < 0)
         {
             die_pipe("child close(pipe_fd[0])");
         }
 
-        // Prepare the message to send to parent
+        // Message sent from child to parent.
         const char* message = "Hello Parent! A message from the child process.\n";
         size_t len = strlen(message);
 
-        // Write message to the pipe
+        // Write message to pipe.
         ssize_t bytes_written = write(pipe_fd[1], message, len);
 
-        // Check for write errors
+        // Check write result.
         if(bytes_written < 0)
         {
             die_pipe("child process write");
         }
 
-        // Warn if partial write occurred
+        // notify if write completed partially (basic handling for this lab).
         if((size_t)bytes_written < len)
         {
             fprintf(stderr,"Child : Partial write (wrote %zd bytes of %zu).\n", bytes_written, len);
         }
 
-        // Close the write end to signal EOF to parent
+        // Close write end so parent can observe EOF.
         if(close(pipe_fd[1])<0)
         {
             die_pipe("child close(pipe_fd[1])");
@@ -116,35 +116,33 @@
     }
     else
     {
-        // ============== PARENT PROCESS ==============
-        // Parent reads the message written by child through the pipe
-        // First, close the write end since parent only reads
+        // Parent is the reader: close unused write end.
         if(close(pipe_fd[1]) < 0)
         {
             die_pipe("Parent close(pipe_fd[1])");
         }
 
-        // Read message from the pipe
+        // Read one message from child.
         char buffer[256];
         ssize_t bytes_read = read(pipe_fd[0], buffer, sizeof(buffer)-1);
 
-        // Check for read errors
+        // Check read result.
         if(bytes_read < 0)
         {
             die_pipe("Parent read");
         }
 
-        // Null-terminate the message and display it
+        // Null-terminate and print what was read.
         buffer[bytes_read] = '\0';
         printf("Parent received the child message : %s\n", buffer);
 
-        // Close the read end after communication is complete
+        // Reader done with the pipe.
         if(close(pipe_fd[0]) < 0)
         {
             die_pipe("parent close(pipe_fd[0])");
         }
 
-        // Wait for child process to complete
+        // Reap child process.
         int status = 0;
 
         if(waitpid(process_id, &status, 0) == -1)
@@ -152,7 +150,7 @@
             die_pipe("waitpid");
         }
 
-        // Check how the child process exited
+        // Report child exit status.
         if (WIFEXITED(status)) 
         {
             printf("child exited with status %d \n", WEXITSTATUS(status));
