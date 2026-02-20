@@ -16,7 +16,7 @@
     How to compile:
         1. Ensure you are in the directory containing this source file.
         2. Use the following command to compile:
-            gcc -Wall -Wextra -O2 -g lab02_pipe_parent_to_child.c
+            gcc -Wall -Wextra -O2 -g lab03_pipe_child_to_parent.c
         3. Run the compiled program:
              ./lab02
     
