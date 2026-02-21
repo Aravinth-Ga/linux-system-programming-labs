@@ -9,8 +9,11 @@ Simple
 - `lab02_pipe_parent_to_child.c`
 - `lab03_pipe_child_to_parent.c`
 - `lab04_pipe_two_children.c`
+- `lab05_dup2_stdout_to_file.c`
+- `lab06_dup_shared_offset.c`
+- `lab07_execvp_redirect.c`
 
 Advanced
-- `lab05_pipe_exec_pipeline.c`
-- `lab06_pipe_error_cases.c`
-- `lab07_pipe_nonblocking.c`
+- `lab08_pipe_exec_pipeline.c`
+- `lab09_pipe_nonblocking.c`
+- `lab10_pipe_error_cases.c`
