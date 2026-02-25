@@ -47,7 +47,7 @@ int main()
 {
     char recv_buffer[1024];
 
-    // 1. Create a socket
+    // 1. Create UDP socket
     int sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
 
     if(sock_fd < 0)
@@ -56,7 +56,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    // 2. Configure the server address
+    // 2. Set up address structure for listening
     struct sockaddr_in server_addr;
     
     memset(&server_addr, 0x00, sizeof(server_addr));
@@ -65,7 +65,7 @@ int main()
     server_addr.sin_port = htons(8000);
     server_addr.sin_addr.s_addr = INADDR_ANY;
 
-    // 3. Bind the socket
+    // 3. Bind socket to port and start listening
     if(bind(sock_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0)
     {
         perror("Bind failed");
@@ -75,8 +75,7 @@ int main()
 
     printf("UDP receiver listening on port %d....\n", PORT);
 
-    // 4. Receive the data from the client
-    
+    // 4. Wait for incoming messages
     while(1)
     {
         int bytes_received = recvfrom(sock_fd, recv_buffer, sizeof(recv_buffer), 0,NULL, NULL);
@@ -87,12 +86,12 @@ int main()
             break;
         }
 
-        recv_buffer[bytes_received] = '\0'; // NULL terminate receive data
+        recv_buffer[bytes_received] = '\0'; // Add null terminator
 
         printf("Received Message : %s \n", recv_buffer);
-
     }
 
+    // 5. Clean up socket
     if(close(sock_fd) < 0)
     {
         perror("close");
