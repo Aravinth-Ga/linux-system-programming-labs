@@ -1,10 +1,8 @@
 # Pipes
 
-Small exercises around `pipe()`. Simple labs cover creating pipes and
-parent/child communication; advanced labs cover `dup2()` with `exec()`
-and nonblocking/error behavior.
+Small exercises around `pipe()`. Labs cover creating pipes,
+parent/child communication, and redirecting I/O with `dup2()`.
 
-Simple
 - `lab01_pipe_basic.c`
 - `lab02_pipe_parent_to_child.c`
 - `lab03_pipe_child_to_parent.c`
@@ -13,85 +11,61 @@ Simple
 - `lab06_dup_shared_offset.c`
 - `lab07_execvp_redirect.c`
 
-Advanced
-- `lab08_pipe_exec_pipeline.c`
-- `lab09_pipe_nonblocking.c`
-- `lab10_pipe_error_cases.c`
 ## Notes: What I Learned About Pipes
 
 ### The Basics
-A pipe is a one-way communication channel between processes. `pipe()` creates two file descriptors - one for reading and one for writing. Data we write on one end comes out on the other end. It's like a tube with input and output.
+A pipe is a one-way communication channel between processes. `pipe()` creates two file descriptors - one for reading and one for writing. Data written to one end comes out the other end.
 
 ### How pipe() Works
-- `pipe()` takes an array of 2 file descriptors and fills it in
+```c
+int fd[2];
+pipe(fd);
+```
 - `fd[0]` = read end of the pipe
 - `fd[1]` = write end of the pipe
 - Data flows one way only: write to fd[1], read from fd[0]
-- `pipe()` returns 0 on success, -1 on failure (usually EMFILE - too many open files)
+- Returns 0 on success, -1 on failure
 
 ### Parent to Child Communication
 When we fork after creating a pipe:
 - Both parent and child inherit copies of fd[0] and fd[1]
-- If parent writes, child can read
-- Important: close what we don't use! If parent writes, close its read end (fd[0])
-- We close unused ends because the pipe stays open as long as ANY process has it open
-- EOF only happens when ALL writers close their copies
+- If parent writes, child reads
+- Important: close what we don't use! Close fd[0] if we're writing
+- Close unused ends because the pipe stays open as long as ANY process has it open
+- EOF happens when ALL writers close their copies
 
 ### Child to Parent Communication
-Same idea but reversed:
+Same idea reversed:
 - Child writes, parent reads
-- Parent still needs to close its write end (fd[1])
-- Parent closes read end after getting all data
-- Child closes both ends after writing (it's done with pipe)
+- Parent closes fd[1] (write end) - it doesn't write
+- Parent closes fd[0] after reading all data
+- Child closes both ends after writing
 
-### Multiple Processes with Pipes
-I found that pipes work between siblings too:
+### Multiple Children with Same Pipe
 - Parent creates pipe BEFORE forking
 - Parent forks multiple children
 - Each child gets the pipe file descriptors
-- All children write or all read from same pipe
-- Important: each process needs to close unused ends
+- All children can write to same pipe (parent reads from all)
+- Each process must close unused ends
 
 ### dup2() and Redirection
-`dup2()` duplicates a file descriptor:
-- `dup2(fd[1], STDOUT_FILENO)` makes stdout point to the pipe write end
-- Now `printf()` and `write(STDOUT_FILENO)` go to the pipe automatically
-- Very useful when combined with `exec()` - the new program inherits redirected stdout/stdin
+`dup2()` makes one file descriptor point to another:
+- `dup2(fd[1], STDOUT_FILENO)` = make stdout point to pipe write end
+- After this, `printf()` goes to the pipe automatically
+- Very useful for redirecting a program's output without changing the program
 
 ### Combining with exec()
 When we `execvp()` after `dup2()`:
-- The executed program inherits the file descriptors
-- Its stdout/stdin are already redirected
-- The program doesn't need to know about pipes - it just uses normal I/O
-- This is how shell pipes work: `cat file | grep pattern`
-
-### File Offset and Pipes
-Pipes don't have offsets like files:
-- Every read gets fresh data (no seeking backwards)
-- Multiple readers on same pipe share the data (each byte goes to one reader)
-- Data is consumed as it's read - can't read it again
-
-### Blocking and Nonblocking Behavior
-- **Blocking** (default): 
-  - Write blocks if pipe is full
-  - Read blocks if pipe is empty
-  - This is what we usually want
-- **Nonblocking** (with fcntl and O_NONBLOCK):
-  - Write returns -1 with EAGAIN if pipe is full
-  - Read returns -1 with EAGAIN if pipe is empty
-  - Useful for handling multiple pipes without waiting
-
-### Error Cases and Edge Cases
-- **Write to pipe with no readers**: Get signal SIGPIPE, write returns -1 with EPIPE
-- **Read from pipe with no writers**: Returns 0 (EOF) when pipe is empty
-- **Broken pipe**: If reader closes fd[0] and we keep writing, EPIPE happens
-- **Too many file descriptors**: `pipe()` fails with EMFILE
+- The new program inherits ALL file descriptors including redirected ones
+- Its stdout is already pointing to our pipe
+- The program doesn't know about pipes - just uses normal `printf()` and `write()`
 
 ### Important Things
-- Always close unused file descriptors. This is critical for pipes!
-- Pipe is usually small (65536 bytes on Linux). Large writes can block
-- Don't forget to close write end before reading EOF - the reader will block forever waiting for more data
-- Multiple readers on same pipe: each byte goes to ONE reader, not all
-- Pipes are unidirectional. For two-way communication, we need TWO pipes
-- Signals can interrupt read/write. If EINTR, just retry
-- Pipes work between unrelated processes too, not just parent-child (through inheritance)
+- Always close unused file descriptors. Critical for pipes!
+- Must close write end before trying to read EOF - otherwise reader blocks forever
+- Multiple readers on same pipe: each byte goes to ONE reader, not broadcast to all
+- Pipes are unidirectional. For two-way communication need TWO pipes
+- Both parent and child start with same fd values, so both can read/write before closing
+- Pipe size is usually 65536 bytes. Large writes can block
+- Close inherited fds after fork if child doesn't need them
+
