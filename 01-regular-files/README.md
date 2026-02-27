@@ -8,9 +8,13 @@ Simple vs advanced
 - Advanced: loops, offsets, or extra checks
 
 Done
-- open() flags and errors
-- read() basics and return values
+- open() flags and errors (7 labs)
+- read() basics and return values (5 labs)
+- write() basics with flags, append, and durability (5 labs)
+- lseek() positioning and error cases (4 labs)
 
 Next
-- write(), lseek(), stat()
-- permissions and directories
+- stat() and file metadata
+- permissions and file modes
+- directories and directory operations
+- links (hard and symbolic)
