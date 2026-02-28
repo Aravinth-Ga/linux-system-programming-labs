@@ -37,3 +37,56 @@
         4. File redirection happens transparently to the executed program.
         5. Output from the executed command is saved to output.txt, not displayed on console.
  */
+
+ #include <fcntl.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <unistd.h>
+ #include <sys/wait.h>
+ #include <stdio.h>
+ 
+
+ int main()
+ {
+    pid_t pid = fork();
+
+    if(pid == 0)
+    {
+        int fd = open("output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+
+        if(fd < 0)
+        {
+            perror("open");
+            exit(EXIT_FAILURE);
+        }
+
+        if(dup2(fd, STDOUT_FILENO) < 0)
+        {
+            perror("dup2");
+            close(fd);
+            exit(EXIT_FAILURE);
+        }
+
+        if(close(fd) < 0)
+        {
+            perror("close");
+            exit(EXIT_FAILURE);
+        }
+
+        char *args[] = {"ls", "-lh", NULL};
+
+        execvp(args[0], args);
+
+        perror("execvp");
+
+        exit(EXIT_FAILURE);
+
+    }
+    else
+    {
+        wait(NULL);
+        printf("Child finished its execution.!\n");
+    }
+
+    return 0;
+ }
