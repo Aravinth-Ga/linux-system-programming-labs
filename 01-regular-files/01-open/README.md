@@ -31,6 +31,9 @@ Flags tell `open()` what we want to do:
 
 ### Modes and umask
 When we create a file with `open(..., O_CREAT, mode)`:
+- `mode` is like 0644 or 0755 (octal numbers)
+- But the actual file permission is: `mode & ~umask`
+- umask is a mask that blocks certain bits. Default is usually 0022
 - So 0666 & ~0022 = 0644 (rw-r--r--)
 
 ### Important Things
