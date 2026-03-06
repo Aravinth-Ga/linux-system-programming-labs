@@ -40,7 +40,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
+#include <errno.h>
 
 static void die(char* msg)
 {
@@ -77,7 +78,26 @@ static void error_case2_sigpipe_epipe(void)
 // try writing after closing the fd - you'll get EBADF (bad file descriptor)
 static void error_case3_ebadf(void)
 {
+    int pipe_fd[2];
 
+    // 1. create a pipe
+    if(pipe(pipe_fd)<0)
+        die("pipe");
+    
+    // 2. Close the pipe
+    close(pipe_fd[0]);
+    close(pipe_fd[1]);
+
+    // 3. Try write on the closed pipe
+
+    const char* msg = "This is test message.\n";
+
+    ssize_t bytes_written = write(pipe_fd[0], msg, strlen(msg));
+
+    if(bytes_written < 0)
+        fprintf(stderr,"write failed. errno=%d (%s)\n", errno, stderr(errno));
+    else
+        fprintf(stderr,"Unexpected! wrote %zd bytes.", bytes_written);
 }
 
 // Error Case 4: doing it right - create a real pipeline
