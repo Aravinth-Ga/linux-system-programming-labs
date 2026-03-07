@@ -71,6 +71,51 @@ static void error_case1_eof_hang(void)
 // Error Case 2: Demonstrate SIGPIPE/EPIPE error
 static void error_case2_sigpipe_epipe(void)
 {
+  int pipe_fd[2];
+
+  if(pipe(pipe_fd) < 0) 
+    die("pipe");
+
+  pid_t pid = fork();
+
+  if(pid < 0) 
+    die("fork");
+
+  if(pid == 0) 
+  {
+    // child: writer
+    close(pipe_fd[0]); // child doesn't read
+
+    // signal(SIGPIPE, SIG_IGN);
+
+    fprintf(stderr, "[case2] child writing with no readers...\n");
+    const char *msg = "X";
+    ssize_t w = write(pipe_fd[1], msg, 1);
+
+    if (w < 0) 
+    {
+      fprintf(stderr, "[case2] write returned -1, errno=%d (%s)\n", errno, strerror(errno));
+      exit(EXIT_FAILURE);
+    }
+    fprintf(stderr, "[case2] wrote %zd bytes\n", w);
+    exit(EXIT_FAILURE);
+  }
+
+  // parent: close both ends, so there are NO readers
+  close(pipe_fd[0]);
+  close(pipe_fd[1]);
+
+  int st = 0;
+  waitpid(pid, &st, 0);
+
+  if (WIFSIGNALED(st)) 
+  {
+    fprintf(stderr, "[case2] child died from signal %d\n", WTERMSIG(st));
+  } 
+  else 
+  {
+    fprintf(stderr, "[case2] child exited normally\n");
+  }
 
 }
 
@@ -78,26 +123,7 @@ static void error_case2_sigpipe_epipe(void)
 // try writing after closing the fd - you'll get EBADF (bad file descriptor)
 static void error_case3_ebadf(void)
 {
-    int pipe_fd[2];
 
-    // 1. create a pipe
-    if(pipe(pipe_fd)<0)
-        die("pipe");
-    
-    // 2. Close the pipe
-    close(pipe_fd[0]);
-    close(pipe_fd[1]);
-
-    // 3. Try write on the closed pipe
-
-    const char* msg = "This is test message.\n";
-
-    ssize_t bytes_written = write(pipe_fd[0], msg, strlen(msg));
-
-    if(bytes_written < 0)
-        fprintf(stderr,"write failed. errno=%d (%s)\n", errno, stderr(errno));
-    else
-        fprintf(stderr,"Unexpected! wrote %zd bytes.", bytes_written);
 }
 
 // Error Case 4: doing it right - create a real pipeline
