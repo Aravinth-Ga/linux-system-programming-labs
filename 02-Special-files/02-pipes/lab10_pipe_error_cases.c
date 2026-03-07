@@ -42,6 +42,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/wait.h>
 
 static void die(char* msg)
 {
@@ -87,7 +88,7 @@ static void error_case2_sigpipe_epipe(void)
     // close read end, we won't use it
     close(pipe_fd[0]); 
 
-    // signal(SIGPIPE, SIG_IGN);
+    signal(SIGPIPE, SIG_IGN);
 
     fprintf(stderr, "[case2] child writing with no readers...\n");
     const char *msg = "X";
