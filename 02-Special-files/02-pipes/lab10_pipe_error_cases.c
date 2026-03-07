@@ -62,13 +62,13 @@ static void usage(char* msg)
           msg);
 }
 
-// Error Case 1: Demonstrate EOF hang issue
+// Error Case 1: what happens when parent forgets to close write end
 static void error_case1_eof_hang(void)
 {
 
 }
 
-// Error Case 2: Demonstrate SIGPIPE/EPIPE error
+// Error Case 2: what happens when we try to write but nobody is reading
 static void error_case2_sigpipe_epipe(void)
 {
   int pipe_fd[2];
@@ -83,8 +83,9 @@ static void error_case2_sigpipe_epipe(void)
 
   if(pid == 0) 
   {
-    // child: writer
-    close(pipe_fd[0]); // child doesn't read
+    // child is the writer
+    // close read end, we won't use it
+    close(pipe_fd[0]); 
 
     // signal(SIGPIPE, SIG_IGN);
 
@@ -101,7 +102,7 @@ static void error_case2_sigpipe_epipe(void)
     exit(EXIT_FAILURE);
   }
 
-  // parent: close both ends, so there are NO readers
+  // parent closes both ends right away, so there are no readers left
   close(pipe_fd[0]);
   close(pipe_fd[1]);
 
