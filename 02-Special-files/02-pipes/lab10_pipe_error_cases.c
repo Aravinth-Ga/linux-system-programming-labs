@@ -66,7 +66,50 @@ static void usage(char* msg)
 // Error Case 1: what happens when parent forgets to close write end
 static void error_case1_eof_hang(void)
 {
+    int pipe_fd[2];
 
+    // 1. create a pipe
+    if (pipe(pipe_fd) < 0) 
+        die("pipe");
+
+    // 2. Copy the process
+    pid_t pid = fork();
+
+    if (pid < 0) 
+        die("fork");
+
+    // 3. Child execution
+    if (pid == 0) 
+    {
+        // child: writer
+        close(pipe_fd[0]); // close read end
+        const char *msg = "hello\n";
+        if (write(pipe_fd[1], msg, strlen(msg)) < 0) die("write(child)");
+        close(pipe_fd[1]);
+        exit(EXIT_FAILURE);
+    }
+
+    // 4. Parent Execution
+    // BUG: parent should close(p[1]) here, but we purposely don't.
+    close(pipe_fd[1]);
+
+    char buf[64];
+    ssize_t n;
+
+    fprintf(stderr, "[case1] parent reading until EOF... (will hang)\n");
+    
+    while ((n = read(pipe_fd[0], buf, sizeof(buf))) > 0) 
+    {
+        write(STDOUT_FILENO, buf, (size_t)n);
+    }
+    
+    if (n < 0) 
+        die("read(parent)");
+    
+        fprintf(stderr, "[case1] got EOF (you won't reach here unless p[1] is closed)\n");
+
+    close(pipe_fd[0]);
+    waitpid(pid, NULL, 0);
 }
 
 // Error Case 2: what happens when we try to write but nobody is reading
