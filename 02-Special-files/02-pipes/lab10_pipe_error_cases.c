@@ -90,7 +90,7 @@ static void error_case1_eof_hang(void)
     }
 
     // 4. Parent Execution
-    // BUG: parent should close(p[1]) here, but we purposely don't.
+    // BUG: parent should close(pipe_fd[1]) here, but we purposely don't.
     close(pipe_fd[1]);
 
     char buf[64];
@@ -168,7 +168,26 @@ static void error_case2_sigpipe_epipe(void)
 // try writing after closing the fd - you'll get EBADF (bad file descriptor)
 static void error_case3_ebadf(void)
 {
+  int pipe_fd[2];
+  if (pipe(pipe_fd) < 0) 
+    die("pipe");
 
+  close(pipe_fd[0]);
+  close(pipe_fd[1]);
+
+  fprintf(stderr, "[case3] writing to a closed fd...\n");
+  const char *msg = "This is test message.\n";
+
+  ssize_t bytes_written = write(pipe_fd[1], msg, 2); // pipe_fd[1] is closed -> EBADF
+
+  if (w < 0) 
+  {
+    fprintf(stderr, "[case3] write failed, errno=%d (%s)\n", errno, strerror(errno));
+  }
+  else 
+  {
+    fprintf(stderr, "[case3] wrote %zd bytes (unexpected)\n", w);
+  }
 }
 
 // Error Case 4: doing it right - create a real pipeline
